@@ -1,6 +1,9 @@
+import { useMemo } from "react"
 
 export default function Chart({ size }: { size: number }) {
-  const data = new Array(20000).fill(0).map((_, i) => Math.sin(i / 10))
+  const data = useMemo(
+    () => (new Array(20000).fill(0).map((_, i) => Math.sin(i / 10)))
+  , []);
   const sum = data.reduce((a, b) => a + b, 0)
 
   return (

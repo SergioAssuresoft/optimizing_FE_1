@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import TicketComposer from '../components/TicketComposer'
 import TicketList from '../components/TicketList'
 import KpiCard from '../components/KpiCard'
@@ -34,6 +34,26 @@ export default function Support() {
     }, {})
     return Object.entries(counters).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—'
   }, [filtered])
+
+  const handleSubmit = useCallback(
+    (draft) => {
+      const newTicket: Ticket = {
+        id: `TCK-${Date.now()}`,
+        title: draft.title,
+        description: draft.description,
+        priority: draft.priority,
+        assignee: agent === 'Todos' ? 'Ada' : agent,
+        channel: 'chat',
+        sentiment: Math.round(Math.random() * 100),
+        tags: ['workshop', 'manual', draft.priority],
+        updates: [
+          { ts: Date.now(), summary: 'Creado manualmente en la sesión' },
+          { ts: Date.now() - 1000 * 60 * 60, summary: 'Sincronización pendiente' }
+        ]
+      }
+      setTickets((state) => [newTicket, ...state])
+    }
+  , [agent])
 
   return (
     <section>
@@ -75,23 +95,7 @@ export default function Support() {
       </div>
 
       <TicketComposer
-        onSubmit={(draft) => {
-          const newTicket: Ticket = {
-            id: `TCK-${Date.now()}`,
-            title: draft.title,
-            description: draft.description,
-            priority: draft.priority,
-            assignee: agent === 'Todos' ? 'Ada' : agent,
-            channel: 'chat',
-            sentiment: Math.round(Math.random() * 100),
-            tags: ['workshop', 'manual', draft.priority],
-            updates: [
-              { ts: Date.now(), summary: 'Creado manualmente en la sesión' },
-              { ts: Date.now() - 1000 * 60 * 60, summary: 'Sincronización pendiente' }
-            ]
-          }
-          setTickets((state) => [newTicket, ...state])
-        }}
+        onSubmit={handleSubmit}
       />
 
       <TicketList tickets={filtered} />

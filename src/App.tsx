@@ -1,12 +1,31 @@
-import { Suspense } from 'react'
+import { Suspense, lazy } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
-import Home from './routes/Home'
-import Catalog from './routes/Catalog'
-import Dashboard from './routes/Dashboard'
-import Profile from './routes/Profile'
-import Reports from './routes/Reports'
-import Support from './routes/Support'
 import './App.css'
+
+const Home = lazy(() => import('./routes/Home'))
+const Catalog = lazy(() => import('./routes/Catalog'))
+const Dashboard = lazy(() => import('./routes/Dashboard'))
+const Reports = lazy(() => import('./routes/Reports'))
+const Support = lazy(() => import('./routes/Support'))
+const Profile = lazy(() => import('./routes/Profile'))
+
+const routePrefetchers: Record<string, () => Promise<unknown>> = {
+  '/': () => import('./routes/Home'),
+  '/catalog': () => import('./routes/Catalog'),
+  '/dashboard': () => import('./routes/Dashboard'),
+  '/reports': () => import('./routes/Reports'),
+  '/support': () => import('./routes/Support'),
+  '/profile': () => import('./routes/Profile')
+}
+
+const prefetchedRoutes = new Set<string>()
+
+const prefetchRoute = (path: string) => {
+  const loader = routePrefetchers[path]
+  if (!loader || prefetchedRoutes.has(path)) return
+  prefetchedRoutes.add(path)
+  loader()
+}
 
 const links = [
   { to: '/', label: 'Home', description: 'Carga hero, fuentes y assets pesados.' },
@@ -34,6 +53,8 @@ export default function App() {
               key={link.to}
               to={link.to}
               end={link.to === '/'}
+              onMouseEnter={() => prefetchRoute(link.to)}
+              onFocus={() => prefetchRoute(link.to)}
               className={({ isActive }) => `nav-link ${isActive ? 'is-active' : ''}`}
             >
               <span className="nav-link__label">{link.label}</span>

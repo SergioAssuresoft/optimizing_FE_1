@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 
 const defaultDraft = {
   title: 'Seguimiento SLA',
@@ -11,7 +11,7 @@ type SubmitArgs = {
   priority: 'low' | 'medium' | 'high'
 }
 
-export default function TicketComposer({ onSubmit }: { onSubmit: (draft: SubmitArgs) => void }) {
+function TicketComposer({ onSubmit }: { onSubmit: (draft: SubmitArgs) => void }) {
   const [draft, setDraft] = useState<SubmitArgs>({ ...defaultDraft, priority: 'medium' })
 
   const preview = useMemo(() => buildPreview(draft.description), [draft.description])
@@ -62,6 +62,8 @@ export default function TicketComposer({ onSubmit }: { onSubmit: (draft: SubmitA
     </div>
   )
 }
+
+export default memo(TicketComposer);
 
 function buildPreview(text: string) {
   const paragraphs = text.split(/\n|\./).filter(Boolean)
